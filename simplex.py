@@ -5,7 +5,7 @@ from numpy.linalg import matrix_rank
 from numpy import hstack as horz_cat
 from numpy import vstack as vert_cat
 from numpy import argmax as max_idx
-from numpy import asscalar as scalar
+from numpy import argmin as min_idx
 from numpy import zeros
 
 def pad_zeros(l):
@@ -33,27 +33,24 @@ N = A[:, m:n]
 A_bar = inv(B) * A # first half is eyes matrix
 b_bar = inv(B) * b
 
-bfs = (b_bar >= 0).all() # basic feasible solution
-if not bfs:
-    print('not BFS, change basis and try again!')
-    quit()
+c_B = c[0:m]
+c_N = c[m:n]
 
-for iteration in range(2):
-    x_bar = horz_cat([b_bar.T, pad_zeros(n - m)]).T
-    # print(A * x_bar) # should be equal to b
+x_bar = horz_cat([b_bar.T, pad_zeros(n - m)]).T
 
-    c_B = c[0:m]
-    c_N = c[m:n]
+for iteration in range(5):
+    print('iteration', iteration)
+    print(x_bar)
+
+    bfs = (x_bar >= 0).all() # basic feasible solution
+    if not bfs:
+        print('not BFS, change basis and try again!')
+        quit()
 
     z_0 = c.T * x_bar
-    print(z_0)
-
     # print(z_0 == c_B.T * b_bar)
 
     xi = c_B.T * A_bar - c.T
-
-    # print(A_bar, end="\n\n")
-    # print(A, end="\n\n")
 
     optmal = (xi <= 0).all()
     if optmal:
@@ -61,6 +58,7 @@ for iteration in range(2):
         quit()
     else:
         k = max_idx(xi)
+        print('k =', k)
         A_bar_k = A_bar[:, k]
         lower_bound = (A_bar_k > 0).any()
         if not lower_bound:
@@ -70,6 +68,7 @@ for iteration in range(2):
         e_k[k] = 1
         d = vert_cat([-A_bar_k, pad_zeros(n - m).T]) + e_k
         select = (A_bar_k > 0)
-        theta = scalar(min(b_bar[select] / A_bar_k[select]))
+        theta = min_idx(b_bar[select] / A_bar_k[select])
         x_hat = x_bar + theta * d
+    # print(x_hat)
     x_bar = x_hat
