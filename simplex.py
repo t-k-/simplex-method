@@ -6,69 +6,75 @@ from numpy import hstack as horz_cat
 from numpy import vstack as vert_cat
 from numpy import argmax as max_idx
 from numpy import argmin as min_idx
+from numpy import amin as amin
 from numpy import zeros
 
 def pad_zeros(l):
     return np.matrix(zeros(l))
 
-# c = np.matrix( [6.8, 2.7,  0,  0]).T
-# A = np.matrix([[668, 883, -1,  0],
-#                [1.5, 1.2,  0, -1]])
+def first_zero(v):
+    return (v == 0).argmax()
 
-c = np.matrix([0,   6.8, 2.7, 0 ]).T
-A = np.matrix([[-1, 668, 883, 0 ],
-               [0,  1.5, 1.2, -1]])
+def print_tableau(c, z, A, x):
+    m, n = A.shape
+    print(c.T, z)
+    for row in range(m):
+        print(A[row, 0:n], x[row])
 
-b = np.matrix([16800, 525]).T
-print('c = ', c)
-print('A = ', A)
-print('b = ', b)
-print()
+c     = np.matrix([ 0, 0, 0,  -1,  2]).T
+A_bar = np.matrix([[1, 0, 0,  -2,  1],
+                   [0, 1, 0,   1, -3],
+                   [0, 0, 1,   1, -1]])
+b_bar = np.matrix([ 2, 1, 2]).T
 
-m = matrix_rank(A)
-m, n = A.shape
-B = A[:, 0:m]
-N = A[:, m:n]
+m, n = A_bar.shape
 
-A_bar = inv(B) * A # first half is eyes matrix
-b_bar = inv(B) * b
+if m != matrix_rank(A_bar):
+    print('not full rank matrix')
+    quit()
 
-c_B = c[0:m]
-c_N = c[m:n]
-
-x_bar = horz_cat([b_bar.T, pad_zeros(n - m)]).T
-
-for iteration in range(5):
+for iteration in range(999):
     print('iteration', iteration)
-    print(x_bar)
-
+    # test BFS
+    x_bar = horz_cat([b_bar.T, pad_zeros(n - m)]).T
     bfs = (x_bar >= 0).all() # basic feasible solution
     if not bfs:
         print('not BFS, change basis and try again!')
         quit()
-
+    # update z_0 and xi
+    c_B = c[0:m]
     z_0 = c.T * x_bar
-    # print(z_0 == c_B.T * b_bar)
-
     xi = c_B.T * A_bar - c.T
-
+    print_tableau(xi.T, z_0, A_bar, b_bar)
+    # test optimality
     optmal = (xi <= 0).all()
     if optmal:
         print('optmal!')
         quit()
-    else:
-        k = max_idx(xi)
-        print('k =', k)
-        A_bar_k = A_bar[:, k]
-        lower_bound = (A_bar_k > 0).any()
-        if not lower_bound:
-            print('no lower bound!')
-            quit()
-        e_k = zeros((n, 1))
-        e_k[k] = 1
-        d = vert_cat([-A_bar_k, pad_zeros(n - m).T]) + e_k
-        select = (A_bar_k > 0)
-        theta = min_idx(b_bar[select] / A_bar_k[select])
-        x_hat = x_bar + theta * d
-    # print(x_hat)
-    x_bar = x_hat
+    # calculate k and A_bar_k, test boundness
+    k = max_idx(xi)
+    A_bar_k = A_bar[:, k]
+    lower_bound = (A_bar_k > 0).any()
+    if not lower_bound:
+        print('no lower bound!')
+        quit()
+    # calculate Delta and theta (step vector)
+    e_k = zeros((n, 1))
+    e_k[k] = 1
+    Delta = vert_cat([-A_bar_k, pad_zeros(n - m).T]) + e_k
+    select = (A_bar_k > 0)
+    theta = amin(b_bar[select] / A_bar_k[select])
+    # move to the new solution space
+    x_hat = x_bar + theta * Delta
+    r = first_zero(x_hat)
+    print('pivot k, r = ', k, r)
+    # swap k, r rows in x_hat
+    x_hat[[k,r]] = x_hat[[r,k]]
+    # swap k, r columns in A_bar
+    A_bar[:, [k,r]] = A_bar[:, [r,k]]
+    # swap k, r rows in C_T
+    c[[k,r]] = c[[r,k]]
+    # update x_bar and A_bar
+    b_bar = x_hat[0:m]
+    B = A_bar[:, 0:m]
+    A_bar = inv(B) * A_bar
