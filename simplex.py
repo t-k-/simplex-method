@@ -9,18 +9,7 @@ from numpy import argmin as min_idx
 from numpy import amin as amin
 from numpy import zeros
 
-def pad_zeros(l):
-    return np.matrix(zeros(l))
-
-def first_zero(v):
-    return (v == 0).argmax()
-
-def print_tableau(c, z, A, x):
-    m, n = A.shape
-    print(c.T, z)
-    for row in range(m):
-        print(A[row, 0:n], x[row])
-
+# input data
 c     = np.matrix([ 0, 0, 0,  -1,  2]).T
 A_bar = np.matrix([[1, 0, 0,  -2,  1],
                    [0, 1, 0,   1, -3],
@@ -29,10 +18,27 @@ b_bar = np.matrix([ 2, 1, 2]).T
 
 m, n = A_bar.shape
 
+# zeros of length l
+def pad_zeros(l):
+    return np.matrix(zeros(l))
+
+# get the index of first zero element
+def first_zero(v):
+    return (v == 0).argmax()
+
+# print Simplex Tableau
+def print_tableau(c, z, A, x):
+    m, n = A.shape
+    print(c.T, z)
+    for row in range(m):
+        print(A[row, 0:n], x[row])
+
+# check if it has redundant rows
 if m != matrix_rank(A_bar):
     print('not full rank matrix')
     quit()
 
+# begin iterations
 for iteration in range(999):
     print('iteration', iteration)
     # test BFS
