@@ -9,12 +9,24 @@ from numpy import argmin as min_idx
 from numpy import amin as amin
 from numpy import zeros
 
-# input data
+# set numpy print function to print fraction instead of decimal
+import fractions
+np.set_printoptions(formatter={'all':
+    lambda x: str(fractions.Fraction(x).limit_denominator()).ljust(6)
+})
+
+# example input #1
 c     = np.matrix([ 0, 0, 0,  -1,  2]).T
 A_bar = np.matrix([[1, 0, 0,  -2,  1],
                    [0, 1, 0,   1, -3],
                    [0, 0, 1,   1, -1]])
 b_bar = np.matrix([ 2, 1, 2]).T
+
+# example input #2
+# c     = np.matrix([ 0, 0,-2, 0,-8,  1,  1]).T
+# A_bar = np.matrix([[1, 0, 1,-1, 6, -1,  0],
+#                    [0, 1, 1, 1, 2,  0, -1]])
+# b_bar = np.matrix([ 2, 1]).T
 
 m, n = A_bar.shape
 
@@ -74,7 +86,7 @@ for iteration in range(999):
     # move to the new solution space
     x_hat = x_bar + theta * Delta
     r = first_zero(x_hat)
-    print('pivot k, r = ', k, r)
+    print('pivot k, r = ', k, r, ', theta = ', theta)
     # swap k, r rows in x_hat
     x_hat[[k,r]] = x_hat[[r,k]]
     # swap k, r columns in A_bar
