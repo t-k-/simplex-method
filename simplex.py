@@ -50,13 +50,14 @@ for iteration in range(999):
     # update z_0 and xi
     c_B = c[0:m]
     z_0 = c.T * x_bar
-    xi = c_B.T * A_bar - c.T
-    print_tableau(xi.T, z_0, A_bar, b_bar)
+    xi = (c_B.T * A_bar - c.T).T
+    xi[0:m] = 0
+    print_tableau(xi, z_0, A_bar, b_bar)
     # test optimality
     optmal = (xi <= 0).all()
     if optmal:
         print('optmal!')
-        quit()
+        break
     # calculate k and A_bar_k, test boundness
     k = max_idx(xi)
     A_bar_k = A_bar[:, k]
