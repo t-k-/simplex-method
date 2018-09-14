@@ -21,6 +21,7 @@ A_bar = np.matrix([[1, 0, 0,  -2,  1],
                    [0, 1, 0,   1, -3],
                    [0, 0, 1,   1, -1]])
 b_bar = np.matrix([ 2, 1, 2]).T
+#b_bar = np.matrix([ 0, 0, 0]).T # degeneracy
 
 # example input #2
 # c     = np.matrix([ 0, 0,-2, 0,-8,  1,  1]).T
@@ -57,7 +58,7 @@ for iteration in range(999):
     x_bar = horz_cat([b_bar.T, pad_zeros(n - m)]).T
     bfs = (x_bar >= 0).all() # basic feasible solution
     if not bfs:
-        print('not BFS, change basis and try again!')
+        print('not BFS initially, try artificial vars!')
         quit()
     # update z_0 and xi
     c_B = c[0:m]
@@ -83,17 +84,21 @@ for iteration in range(999):
     Delta = vert_cat([-A_bar_k, pad_zeros(n - m).T]) + e_k
     select = (A_bar_k > 0)
     theta = amin(b_bar[select] / A_bar_k[select])
-    # move to the new solution space
-    x_hat = x_bar + theta * Delta
-    r = first_zero(x_hat)
-    print('pivot k, r = ', k, r, ', theta = ', theta)
-    # swap k, r rows in x_hat
-    x_hat[[k,r]] = x_hat[[r,k]]
+    if theta == 0:
+        print('degeneracy, choose a random r...')
+        r = np.random.randint(m)
+    else:
+        # move to the new solution
+        x_bar = x_bar + theta * Delta
+        r = first_zero(x_bar)
+    print('pivot k = %u, r = %u.' % (k, r))
+    # swap k, r rows in x_bar
+    x_bar[[k,r]] = x_bar[[r,k]]
     # swap k, r columns in A_bar
     A_bar[:, [k,r]] = A_bar[:, [r,k]]
     # swap k, r rows in C_T
     c[[k,r]] = c[[r,k]]
     # update x_bar and A_bar
-    b_bar = x_hat[0:m]
+    b_bar = x_bar[0:m]
     B = A_bar[:, 0:m]
     A_bar = inv(B) * A_bar
