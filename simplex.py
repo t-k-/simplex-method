@@ -21,7 +21,7 @@ A_bar = np.matrix([[1, 0, 0,  -2,  1],
                    [0, 1, 0,   1, -3],
                    [0, 0, 1,   1, -1]])
 b_bar = np.matrix([ 2, 1, 2]).T
-#b_bar = np.matrix([ 0, 0, 0]).T # degeneracy
+# b_bar = np.matrix([ 0, 0, 0]).T # degeneracy
 
 # example input #2
 # c     = np.matrix([ 0, 0,-2, 0,-8,  1,  1]).T
@@ -91,7 +91,8 @@ for iteration in range(999):
         # move to the new solution
         x_bar = x_bar + theta * Delta
         r = first_zero(x_bar)
-    print('pivot k = %u, r = %u.' % (k, r))
+    print('pivot k = %u, r = %u, theta = %s' % (k, r,
+        str(fractions.Fraction(theta).limit_denominator())))
     # swap k, r rows in x_bar
     x_bar[[k,r]] = x_bar[[r,k]]
     # swap k, r columns in A_bar
@@ -99,6 +100,7 @@ for iteration in range(999):
     # swap k, r rows in C_T
     c[[k,r]] = c[[r,k]]
     # update x_bar and A_bar
-    b_bar = x_bar[0:m]
     B = A_bar[:, 0:m]
+    assert(np.allclose(inv(B) * b_bar, x_bar[0:m]))
+    b_bar = x_bar[0:m]
     A_bar = inv(B) * A_bar
