@@ -65,6 +65,7 @@ for iteration in range(999):
     z_0 = c.T * x_bar
     xi = (c_B.T * A_bar - c.T).T
     xi[0:m] = 0
+    assert(np.allclose(xi.T * x_bar, np.matrix([0])))
     print_tableau(xi, z_0, A_bar, b_bar)
     # test optimality
     optmal = (xi <= 0).all()
