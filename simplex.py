@@ -19,7 +19,8 @@ def print_frac(x):
 import fractions
 np.set_printoptions(formatter={})
 np.set_printoptions(formatter ={
-    'float': print_frac,
+    'float': print_float,
+    #'float': print_frac,
     'str_kind': lambda x: str("%8s" % x)
 })
 
@@ -61,7 +62,7 @@ def simplex_tableau(names, c, A_bar, b_bar):
         # update objective row (update z_0)
         z_0 -= xi_B.T * b_bar
         # new iteration ready ...
-        print('iteration', iteration)
+        print('## Iteration', iteration)
         print_tableau(names, xi, z_0, A_bar, b_bar)
         if (xi <= 0).all() and (b_bar >= 0).all():
             print('optimal!')
@@ -111,7 +112,7 @@ def simplex_theory(names, c, A_bar, b_bar):
     print_tableau(names, xi, z_0, A_bar, b_bar)
     # start iterations
     for iteration in range(99):
-        print('iteration', iteration)
+        print('## Iteration', iteration)
         # update z_0 and xi
         x_bar = horz_cat([b_bar.T, pad_zeros(n - m)]).T
         c_B = c[0:m]
@@ -169,17 +170,18 @@ def main():
 
     # example input #2
     # names = np.array(['x' + str(i) for i in range(1, 8)])
-    # c     = np.matrix([ 0, 0,-2, 0,-8,  1,  1]).T
-    # A_bar = np.matrix([[1, 0, 1,-1, 6, -1,  0],
-    #                    [0, 1, 1, 1, 2,  0, -1]])
-    # b_bar = np.matrix([ 2, 1]).T
+    # c     = np.matrix([ 0.0, 0.0, -2.0,  0.0, -8.0,  1.0,  1.0]).T
+    # A_bar = np.matrix([[1.0, 0.0,  1.0, -1.0,  6.0, -1.0,  0.0],
+    #                    [0.0, 1.0,  1.0,  1.0,  2.0,  0.0, -1.0]])
+    # b_bar = np.matrix([ 2.0, 1.0]).T
 
     # example input #3
-    # names = np.array(['s1', 's2', 'x1', 'x2'])
-    # c     = np.matrix([ 0, 0, 6.8, 2.7]).T
-    # A_bar = np.matrix([[1, 0, -668, -883],
-    #                    [0, 1, -1.5, -1.2]])
-    # b_bar = np.matrix([ -16800, -525]).T
+	# http://zhangxiaoyang.me/categories/intro-to-algorithms-tutorial/intro-to-algorithms-tutorial-6-1.html
+    names = np.array( ['s1', 's2', 'x1', 'x2'])
+    c     = np.matrix([ 0.0, 0.0,  6.8,  2.7]).T
+    A_bar = np.matrix([[1.0, 0.0, -668.0, -883.0],
+                       [0.0, 1.0, -1.5, -1.2]])
+    b_bar = np.matrix([ -16800.0, -525.0]).T
 
     # example input #4
     # https://www.hrwhisper.me/introduction-to-simplex-algorithm/
@@ -192,11 +194,12 @@ def main():
     # b_bar = np.matrix([4.0, 2.0, 3.0, 6.0]).T
 
     # example input #5 (no lower bound)
-    names = np.array( ['x3', 'x4', 'x1', 'x2'])
-    c     = np.matrix([ 0.0, 0.0, -1.0,  -1.0]).T
-    A_bar = np.matrix([[1.0, 0.0,  1.0,  -1.0],
-                       [0.0, 1.0, -1.0,   1.0]])
-    b_bar = np.matrix([ 1.0, 1.0]).T
+    # https://www.hrwhisper.me/introduction-to-simplex-algorithm/
+    # names = np.array( ['x3', 'x4', 'x1', 'x2'])
+    # c     = np.matrix([ 0.0, 0.0, -1.0,  -1.0]).T
+    # A_bar = np.matrix([[1.0, 0.0,  1.0,  -1.0],
+    #                    [0.0, 1.0, -1.0,   1.0]])
+    # b_bar = np.matrix([ 1.0, 1.0]).T
 
     simplex_tableau(names, c, A_bar, b_bar)
     #simplex_theory(names, c, A_bar, b_bar)
